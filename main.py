@@ -1,8 +1,7 @@
-from menu_page import menu
+# import json
+import menu_page
+
 
 print("Welcome to School Eye")
 
-def manage_operation():
-    menu()
-
-manage_operation()
+menu_page.menu()

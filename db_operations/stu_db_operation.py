@@ -1,12 +1,10 @@
 import mysql.connector
-# from mysql.connector.errors import Error
 import json
 import menu_page
-import stu_info
-
+import student_menu
 
 def get_basic_info():
-    with open('basic_info.json', 'r') as info:
+    with open("db_operations/database_info.json", 'r') as info:
         data = json.load(info)
     return data
 
@@ -39,10 +37,10 @@ def create_db(database_name: str):
     cursor.execute(db_query)
 
     # updating name of student table
-    with open("basic_info.json", 'r') as info:
+    with open("database_info.json", 'r') as info:
         data = json.load(info)
     data["database"] = database_name
-    with open('basic_info.json', 'w') as info:
+    with open('database_info.json', 'w') as info:
         json.dump(data, info, indent=4)
 
     print(f"Database named '{database_name}' created successfully...")
@@ -52,7 +50,7 @@ def create_db(database_name: str):
     mydb.close()
     menu_page.menu()
 
-def create_stu_details_tb(table_name: str = "student_info"):
+def create_stu_details_tb(table_name: str):
     """
     It will create a table which contains student's information
     :param table_name: (string) Enter table name
@@ -83,13 +81,16 @@ def create_stu_details_tb(table_name: str = "student_info"):
     cursor.execute(create_tb_query)
 
     # updating name of student table
-    with open("basic_info.json", 'r') as info:
+    with open("db_operations/database_info.json", 'r') as info:
         data = json.load(info)
     data["student_tb"] = table_name
-    with open('basic_info.json', 'w') as info:
+    with open('db_operations/database_info.json', 'w') as info:
         json.dump(data, info, indent=4)
 
     print(f"Table '{table_name}' created successfully...")
+    print("Current schema of the table - ")
+    print("-----------------------------------------------------------------------------")
+    print("| student_id | roll_no | first_name | last_name | age | class | father_name | address |")
 
     # closing the connections
     cursor.close()
@@ -130,14 +131,13 @@ def insert_student_data(roll_no: int, first_name: str, last_name: str, age: int,
     print("-------------------------- OUTPUT -------------------------------------------")
     print(cursor.rowcount, "rows affected...")
 
-    cursor.execute(f'''SELECT COUNT(student_id) FROM {data["student_tb"]}''')
-    result = cursor.fetchall()
-    print(f"Student id of {first_name} : {result[0][0]}")
+    # getting the student_id of the student whose details are inserted right now.
+    print(f"Student id of {first_name} : ", cursor.lastrowid)
 
     # closing the connections
     cursor.close()
     mydb.close()
-    stu_info.student_func()
+    student_menu.menu()
 
 
 def get_stu_information(id):
@@ -164,7 +164,7 @@ def get_stu_information(id):
     # closing the connections
     cursor.close()
     mydb.close()
-    stu_info.student_func()
+    student_menu.menu()
 
 def delete_stu_info(id):
     # accessing user info
@@ -176,18 +176,32 @@ def delete_stu_info(id):
     # preparing cursor object
     cursor = mydb.cursor()
 
-    query = f'''DELETE FROM {data["student_tb"]}
-                WHERE student_id = {id} '''
+    fetch_query = f'''SELECT * FROM {data["student_tb"]}
+                        WHERE student_id = {id}'''
+    cursor.execute(fetch_query)
+    details = cursor.fetchall()
+    if len(details) < 1:
+        print("-------------------------- OUTPUT -------------------------------------------")
+        print("No records found...")
+    else:
+        print("-------------------------- OUTPUT -------------------------------------------")
+        print("Details fetched...")
+        print(details[0])
+        ch = input("\nAre you want to delete this ? Press y/Y for 'Yes' or n/N for 'No' : ")
 
-    cursor.execute(query)
-    mydb.commit()
-    print("-------------------------- OUTPUT -------------------------------------------")
-    print(cursor.rowcount, " rows affected.")
+        if ch in ["y", "Y", "YES", "yes"]:
+            query = f'''DELETE FROM {data["student_tb"]}
+                        WHERE student_id = {id} '''
+
+            cursor.execute(query)
+            mydb.commit()
+            print("-------------------------- OUTPUT -------------------------------------------")
+            print(cursor.rowcount, " rows affected.")
 
     # closing the connections
     cursor.close()
     mydb.close()
-    stu_info.student_func()
+    student_menu.menu()
 
 def update_stu_info(id, update_col):
     # accessing user info
@@ -234,13 +248,13 @@ def update_stu_info(id, update_col):
         else:
             print("-------------------------- OUTPUT -------------------------------------------")
             print("No data updated!!")
-            stu_info.student_func()
+            student_menu.menu()
 
 
     # closing the connections
     cursor.close()
     mydb.close()
-    stu_info.student_func()
+    student_menu.menu()
 
 def stu_all_info():
     # accessing user info
@@ -266,4 +280,4 @@ def stu_all_info():
     # closing the connections
     cursor.close()
     mydb.close()
-    stu_info.student_func()
+    student_menu.menu()

@@ -6,5 +6,3 @@ Project Status (31/12/23):
 - Currently working on GUI. Once interface for student management is completed then will work on other departments, user sign-up/login, exceptions handling.
 - Project is currently at a very early stage.
 
-Regards,
-Abhishek Anand

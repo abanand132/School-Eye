@@ -1,4 +1,4 @@
-import db_operation as db
+from db_operations import stu_db_operation as stu_db
 import menu_page
 
 
@@ -39,9 +39,9 @@ def add_new_student():
     stu1.personal_details()
     stu1.add_academic_details()
 
-    db.insert_student_data(roll_no=stu1.roll_no, first_name=stu1.first_name,
-                           last_name=stu1.last_name, age=stu1.age, class_=stu1.class_,
-                           father_name=stu1.father_name, address=stu1.address)
+    stu_db.insert_student_data(roll_no=stu1.roll_no, first_name=stu1.first_name,
+                               last_name=stu1.last_name, age=stu1.age, class_=stu1.class_,
+                               father_name=stu1.father_name, address=stu1.address)
 
 def update_student_info():
     id = int(input("Enter student id : "))
@@ -52,11 +52,11 @@ def update_student_info():
     column_list = ["roll_no", "first_name", "last_name", "age", "class", "father_name", "address"]
 
     update_col = column_list[choice - 1]
-    db.update_stu_info(id, update_col)
+    stu_db.update_stu_info(id, update_col)
 
 # Main Program
 
-def student_func():
+def menu():
     while True:
         print("-----------------------------------------------------------------------------")
         print(f"Press 1 - Add New Student\n"
@@ -75,17 +75,17 @@ def student_func():
 
         if ch == "2":
             id = int(input("Enter student id : "))
-            db.get_stu_information(id)
+            stu_db.get_stu_information(id)
 
         if ch == "3":
             id = int(input("Enter student id : "))
-            db.delete_stu_info(id)
+            stu_db.delete_stu_info(id)
 
         if ch == "4":
             update_student_info()
 
         if ch == "5":
-            db.stu_all_info()
+            stu_db.stu_all_info()
 
         if ch in ["b", "B"]:
             menu_page.menu()
@@ -94,4 +94,3 @@ def student_func():
             print("-----------------------------------------------------------------------------")
             print("Thank you!!")
             exit()
-
