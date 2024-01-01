@@ -3,41 +3,26 @@ import menu_page
 
 
 class Student:
+
+    column_list = []
     def __init__(self):
-        self.roll_no = None
-        self.first_name = None
-        self.last_name = None
-        self.age = None
-        self.class_ = None
-        self.father_name = None
-        self.address = None
+        data = stu_db.get_basic_info()
+        column_list = stu_db.get_scheme(data["student_tb"])
 
-
-    def add_academic_details(self):
-        self.class_ = int(input("Enter class in which student read : "))
-        self.roll_no = int(input("Roll No. : "))
+        for column_name in column_list:
+            if column_name != "student_id":
+                setattr(self, f"{column_name}", None)
 
     def personal_details(self):
-        self.first_name = input("First Name : ")
-        self.last_name = input("last Name : ")
-        self.age = int(input("Age : "))
-        self.father_name = input("Father's Name : ")
-        self.address = input("Address/City : ")
+        for variable in self.__dict__.keys():
+            setattr(self, variable, input(f"Enter {variable} : "))
 
-    # __str__() is used to return the string representation of the object. This function is called when
-    # the object of the class is printed.
-    def __str__(self):
-        return (f"Name : {self.first_name} {self.last_name}\n"
-                f"Roll No : {self.roll_no}\nClass : {self.class_}\n"
-                f"Age : {self.age}\n"
-                f"Father's Name : {self.father_name}\n"
-                f"Address : {self.address}")
+
 
 
 def add_new_student():
     stu1 = Student()
     stu1.personal_details()
-    stu1.add_academic_details()
 
     stu_db.insert_student_data(roll_no=stu1.roll_no, first_name=stu1.first_name,
                                last_name=stu1.last_name, age=stu1.age, class_=stu1.class_,

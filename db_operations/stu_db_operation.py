@@ -2,6 +2,7 @@ import mysql.connector
 import json
 import menu_page
 import student_menu
+import dept_menu
 
 def get_basic_info():
     with open("db_operations/database_info.json", 'r') as info:
@@ -37,7 +38,7 @@ def create_db(database_name: str):
     cursor.execute(db_query)
 
     # updating name of student table
-    with open("database_info.json", 'r') as info:
+    with open("db_operations/database_info.json", 'r') as info:
         data = json.load(info)
     data["database"] = database_name
     with open('database_info.json', 'w') as info:
@@ -49,6 +50,25 @@ def create_db(database_name: str):
     cursor.close()
     mydb.close()
     menu_page.menu()
+
+def get_scheme(tb_name):
+    # accessing user info
+    data = get_basic_info()
+
+    # establishing connection with the database
+    mydb = make_connection(data)
+
+    # preparing cursor object
+    cursor = mydb.cursor()
+
+    query = f'''DESC {tb_name}'''
+    cursor.execute(query)
+    result = cursor.fetchall()
+    column_list = []
+    for column in result:
+        column_list.append(column[0])
+
+    return column_list
 
 def create_stu_details_tb(table_name: str):
     """
@@ -72,7 +92,7 @@ def create_stu_details_tb(table_name: str):
                           first_name VARCHAR(20),
                           last_name VARCHAR(20),
                           age INT,
-                          class INT,
+                          class_ INT,
                           father_name VARCHAR(50),
                           address VARCHAR(60)
                           )'''
@@ -90,13 +110,93 @@ def create_stu_details_tb(table_name: str):
     print(f"Table '{table_name}' created successfully...")
     print("Current schema of the table - ")
     print("-----------------------------------------------------------------------------")
-    print("| student_id | roll_no | first_name | last_name | age | class | father_name | address |")
+
 
     # closing the connections
     cursor.close()
     mydb.close()
     menu_page.menu()
 
+def modify_stu_tb_schema():
+    # accessing user info
+    data = get_basic_info()
+
+    # establishing connection with the database
+    mydb = make_connection(data)
+
+    # preparing cursor object
+    cursor = mydb.cursor()
+
+    print("---------------------- MODIFICATION MENU ----------------------------------------")
+    print("1. Add a column\n2. Delete a column\n3. Rename a column\n"
+          "4. Change datatype of the column\nb/B. Back to Dept. Menu\n"
+          "q/Q. Exit")
+    ch = input("\nEnter choice : ")
+
+    # Add Column
+    if ch == "1":
+        col_name = input("Enter column name : ")
+        col_datatype = input("Enter datatype of the column : ")
+        query = f'''ALTER TABLE {data["student_tb"]}
+                    ADD COLUMN {col_name} {col_datatype}'''
+
+        cursor.execute(query)
+        mydb.commit()
+
+        print("-----------------------------------------------------------------------------")
+        print(f"Column '{col_name}' added successfully...")
+        modify_stu_tb_schema()
+
+    # Drop Column
+    if ch == "2":
+        i = 1
+        column_list = get_scheme(data["student_tb"])
+        print("Select column to be deleted : ")
+        for x in column_list:
+            print(f"{i}.", x)
+            i += 1
+        column_pos = int(input("\nEnter column no. : "))
+        column = column_list[column_pos - 1]
+        query = f'''ALTER TABLE {data["student_tb"]}
+                    DROP COLUMN {column} '''
+        cursor.execute(query)
+        mydb.commit()
+
+        print("-----------------------------------------------------------------------------")
+        print(f"Column '{column}' deleted successfully...")
+        modify_stu_tb_schema()
+
+    # Rename column
+    if ch == "3":
+        i = 1
+        column_list = get_scheme(data["student_tb"])
+        print("Select column to be renamed : ")
+        for x in column_list:
+            print(f"{i}.", x)
+            i += 1
+        column_pos = int(input("\nEnter column no. : "))
+        column = column_list[column_pos - 1]
+        col_name = input("Enter new column name : ")
+        query = f'''ALTER TABLE {data["student_tb"]}
+                            RENAME COLUMN {column} to {col_name} '''
+
+        cursor.execute(query)
+        mydb.commit()
+
+        print("-----------------------------------------------------------------------------")
+        print(f"Column '{col_name}' renamed successfully...")
+        modify_stu_tb_schema()
+
+    if ch == "4":
+        pass
+
+    if ch in ["b", "B"]:
+        dept_menu.menu()
+
+    if ch in ["q", "Q", "quit"]:
+        print("-----------------------------------------------------------------------------")
+        print("Thank you!!!")
+        exit()
 
 def insert_student_data(roll_no: int, first_name: str, last_name: str, age: int,
                         class_: int, father_name: str, address: str):
@@ -108,7 +208,7 @@ def insert_student_data(roll_no: int, first_name: str, last_name: str, age: int,
     :param class_: class in which the student is studying
     :param father_name: father's name of the student
     :param address: present address of the student
-    :return:
+    :return: confirmation message
     """
     # accessing user info
     data = get_basic_info()
@@ -120,7 +220,7 @@ def insert_student_data(roll_no: int, first_name: str, last_name: str, age: int,
     cursor = mydb.cursor()
 
     insert_query = f'''INSERT INTO {data["student_tb"]} 
-                       (roll_no, first_name, last_name, age, class, father_name, address)
+                       (roll_no, first_name, last_name, age, class_, father_name, address)
                        VALUES 
                        (%s, %s, %s, %s, %s, %s, %s) '''
 

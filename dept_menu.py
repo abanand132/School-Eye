@@ -14,7 +14,7 @@ def student_tb_menu():
         stu_db.create_stu_details_tb(tb_name)
 
     if ch == "2":
-        pass
+        stu_db.modify_stu_tb_schema()
 
     if ch in ["b", "B"]:
         menu()
