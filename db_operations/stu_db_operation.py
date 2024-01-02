@@ -41,7 +41,7 @@ def create_db(database_name: str):
     with open("db_operations/database_info.json", 'r') as info:
         data = json.load(info)
     data["database"] = database_name
-    with open('database_info.json', 'w') as info:
+    with open('db_operations/database_info.json', 'w') as info:
         json.dump(data, info, indent=4)
 
     print(f"Database named '{database_name}' created successfully...")
@@ -110,12 +110,13 @@ def create_stu_details_tb(table_name: str):
     print(f"Table '{table_name}' created successfully...")
     print("Current schema of the table - ")
     print("-----------------------------------------------------------------------------")
-
+    scheme = get_scheme(f"{table_name}")
+    print(scheme)
 
     # closing the connections
     cursor.close()
     mydb.close()
-    menu_page.menu()
+    dept_menu.student_tb_menu()
 
 def modify_stu_tb_schema():
     # accessing user info
@@ -145,7 +146,6 @@ def modify_stu_tb_schema():
 
         print("-----------------------------------------------------------------------------")
         print(f"Column '{col_name}' added successfully...")
-        modify_stu_tb_schema()
 
     # Drop Column
     if ch == "2":
@@ -164,7 +164,6 @@ def modify_stu_tb_schema():
 
         print("-----------------------------------------------------------------------------")
         print(f"Column '{column}' deleted successfully...")
-        modify_stu_tb_schema()
 
     # Rename column
     if ch == "3":
@@ -189,7 +188,23 @@ def modify_stu_tb_schema():
 
     # changing the datatype of the column
     if ch == "4":
-        pass
+        i = 1
+        column_list = get_scheme(data["student_tb"])
+        print("Select column to change datatype : ")
+        for x in column_list:
+            print(f"{i}.", x)
+            i += 1
+        column_pos = int(input("\nEnter column no. : "))
+        column = column_list[column_pos - 1]
+        datatype = input(f"Enter new datatype of '{column}' : ")
+        query = f'''ALTER TABLE {data["student_tb"]}
+                    MODIFY COLUMN {column} {datatype}'''
+        cursor.execute(query)
+        mydb.commit()
+
+        print("-----------------------------------------------------------------------------")
+        print(f"Column '{column}' modified successfully...")
+        modify_stu_tb_schema()
 
     if ch in ["b", "B"]:
         dept_menu.menu()
@@ -198,6 +213,11 @@ def modify_stu_tb_schema():
         print("-----------------------------------------------------------------------------")
         print("Thank you!!!")
         exit()
+
+    # closing the connections
+    cursor.close()
+    mydb.close()
+    modify_stu_tb_schema()
 
 def insert_student_data(obj):
     """ It helps in inserting data of the student in the database
@@ -216,8 +236,7 @@ def insert_student_data(obj):
 
     columns_name = ', '.join([key for key in obj.__dict__.keys()])
     format_specifier = ', '.join(["%s" for _ in obj.__dict__.values()])
-    # print(columns_name)
-    # print(format_specifier)
+
     insert_query = f'''INSERT INTO {data["student_tb"]}
                        ({columns_name})
                        VALUES
@@ -368,12 +387,13 @@ def stu_all_info():
 
     query = f'''SELECT * FROM {data["student_tb"]}'''
     cursor.execute(query)
-    data = cursor.fetchall()
+    result = cursor.fetchall()
 
     print("-------------------------- OUTPUT -------------------------------------------")
     print(f"{len(data)} records found...")
-    print("student id, roll no, first_name, last_name, age, class, father_name, address")
-    for stu_data in data:
+    column_list = get_scheme(data["student_tb"])
+    print(column_list)
+    for stu_data in result:
         print("-----------------------------------------------------------------------------")
         print(stu_data)
 
