@@ -3,8 +3,6 @@ import menu_page
 
 
 class Student:
-
-    column_list = []
     def __init__(self):
         data = stu_db.get_basic_info()
         column_list = stu_db.get_scheme(data["student_tb"])
@@ -24,9 +22,7 @@ def add_new_student():
     stu1 = Student()
     stu1.personal_details()
 
-    stu_db.insert_student_data(roll_no=stu1.roll_no, first_name=stu1.first_name,
-                               last_name=stu1.last_name, age=stu1.age, class_=stu1.class_,
-                               father_name=stu1.father_name, address=stu1.address)
+    stu_db.insert_student_data(stu1)
 
 def update_student_info():
     id = int(input("Enter student id : "))

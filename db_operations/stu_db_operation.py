@@ -187,6 +187,7 @@ def modify_stu_tb_schema():
         print(f"Column '{col_name}' renamed successfully...")
         modify_stu_tb_schema()
 
+    # changing the datatype of the column
     if ch == "4":
         pass
 
@@ -198,16 +199,9 @@ def modify_stu_tb_schema():
         print("Thank you!!!")
         exit()
 
-def insert_student_data(roll_no: int, first_name: str, last_name: str, age: int,
-                        class_: int, father_name: str, address: str):
+def insert_student_data(obj):
     """ It helps in inserting data of the student in the database
-    :param roll_no: roll no. of the student
-    :param first_name: first name of the student
-    :param last_name: middle + last name of the student
-    :param age: age of the student
-    :param class_: class in which the student is studying
-    :param father_name: father's name of the student
-    :param address: present address of the student
+    :param obj: object of Student class
     :return: confirmation message
     """
     # accessing user info
@@ -218,21 +212,27 @@ def insert_student_data(roll_no: int, first_name: str, last_name: str, age: int,
 
     # preparing cursor object
     cursor = mydb.cursor()
+    # print(obj.__dict__)
 
-    insert_query = f'''INSERT INTO {data["student_tb"]} 
-                       (roll_no, first_name, last_name, age, class_, father_name, address)
-                       VALUES 
-                       (%s, %s, %s, %s, %s, %s, %s) '''
+    columns_name = ', '.join([key for key in obj.__dict__.keys()])
+    format_specifier = ', '.join(["%s" for _ in obj.__dict__.values()])
+    # print(columns_name)
+    # print(format_specifier)
+    insert_query = f'''INSERT INTO {data["student_tb"]}
+                       ({columns_name})
+                       VALUES
+                       ({format_specifier}) '''
 
-    column_val = (roll_no, first_name, last_name, age, class_, father_name, address)
+    column_value = tuple([value for value in obj.__dict__.values()])
 
-    cursor.execute(insert_query, column_val)
+    cursor.execute(insert_query, column_value)
     mydb.commit()
+
     print("-------------------------- OUTPUT -------------------------------------------")
     print(cursor.rowcount, "rows affected...")
 
     # getting the student_id of the student whose details are inserted right now.
-    print(f"Student id of {first_name} : ", cursor.lastrowid)
+    print(f"Student id of {column_value[1]} : ", cursor.lastrowid)
 
     # closing the connections
     cursor.close()
