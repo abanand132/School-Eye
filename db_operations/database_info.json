@@ -1,7 +1,7 @@
 {
     "host": "localhost",
     "db_user": "root",
-    "db_password": "System-abhishek",
-    "database": "dav",
-    "student_tb": "student"
+    "db_password": "",
+    "database": "",
+    "student_tb": ""
 }
